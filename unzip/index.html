@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>imagickLib Documentation</title>
+
+<style>
+	body {
+		font-family: tahoma,verdana,arial,sans-serif;
+		font-size: 12px;
+		margin: 10;
+		padding: 0;
+	}
+	
+	pre {
+		font-family: "Courier New";
+		border: 1px dotted #666;
+		background-color: #ccc;
+		padding: 5px;
+	}
+	
+	h1, h2 {
+		border-bottom: 1px dotted #666;
+	}
+</style>
+
+</head>
+<body>
+
+<h1>Documentation imagickLib</h1>
+
+<a href="#about">About imagickLib</a><br />
+<a href="#first">First example</a><br />
+<a href="#configuration">Configuration</a><br />
+<a href="#input">Input and output images</a><br />
+<a href="#actions">Actions</a><br />
+<a href="#methods">Useful methods</a><br />
+<a href="#examples">Try examples</a><br />
+
+<h2><a name="about">About imagickLib</a></h2>
+<p>The php class imagickLib uses ImageMagick to manipulate images.</p>
+<h3>Requirements</h3>
+<ul>
+	<li>PHP4 or higher</li>
+	<li>ImageMagick (tested with version 6.2.4)</li>
+	<li>webserver need write-access</li>
+</ul>
+<p>Written by Oliver K&uuml;hrig, viersicht (http://www.viersicht.de)</p>
+<p></p>
+
+<h2><a name="first">First example</a></h2>
+<p>At the beginning you have to load and instantiate the class. After these steps load the image, make as many "actions" as you want and finally save it to a new file.</p>
+<p>Here we read the file "Bambus.jpg", resize it and save it into a new file.</p>
+<pre>
+// include the class file (required)
+include('class.imagickLib.php');
+
+// make a instance of the class (required)
+$l_oImageMagick = new imagickLib();
+
+// image input by file
+$l_oImageMagick->input("file", "./img/Bambus.jpg");
+
+// resize the image to max. 400px width and max. 300px height
+$l_oImageMagick->actionResize(400, 300);
+
+// image output into file named "testpic0"
+$l_oImageMagick->output("file", "testpic0");
+</pre>
+
+
+
+<h2><a name="configuration">Configuration</a></h2>
+<p>Locate the binary files of ImageMagick. By default it is "/usr/bin/".</p>
+<pre>
+var $imageMagickDir = '/usr/bin/';	// ImageMagick binary files
+</pre>
+
+<p>Enable or disable logging. Define the logfile-path and file. The file needs write permission by the webserver.</p>
+<pre>
+var $log = true;			// write log file, if true
+var $logDir = './';			// logfile dir
+var $logFile = 'imagickLib.log';	// logfile name
+</pre>
+
+<p>imagickLib produces temporary file. Define the temporary directory to store them. In the end the files will be deleted by the "cleanUp"-method.</p>
+<pre>
+var $tempDir = '/var/tmp/'; // httpd must be able to write there
+</pre>
+
+<p>Defines the default directory to store the resulting images. Can be changed while using the class.</p>
+<pre>
+var $targetDir = './';		// target dir for the result picture
+</pre>
+
+<p>Defines the JPG-Quality</p>
+<pre>
+var $jpgQuality	= '65';		// quality for JPG images
+</pre>
+
+<p>To produce small image-files, strip all profile informations for example exif data. You have to perform at least one  "actionConvert()"</p>
+<pre>
+var $stripProfile = true;	// if set to true on conversion image profile information will be stripped
+</pre>
+
+
+
+<h2><a name="input">Input and output images</a></h2>
+<h3>Input</h3>
+<p>The input-method knows three possibilities to load images:</p>
+<ul>
+	<li>"file" reads the images from the file-system.</li>
+	<li>"binary" gets the image in binary-format for example by the function "file_get_contents()"</li>
+	<li>"http" reads the image from the internet</li>
+</ul>
+<pre>
+$l_oImageMagick->input("file", "./img/Bambus.jpg");
+$l_oImageMagick->input("binary", file_get_contents("./img/Bambus.jpg"));
+$l_oImageMagick->input("http", "http://www.example.com/Bambus.jpg");
+</pre>
+
+<h3>Output</h3>
+<p>To get the produced image you can use two ways:</p>
+<ul>
+	<li>"file" writes the image to the default image-directory. The extension will be appended automatically.</li>
+	<li>"binary" returns the binary data.</li>
+</ul>
+<pre>
+$l_oImageMagick->output("file", "testpic0");
+$l_oImageMagick->output("binary");
+</pre>
+
+
+
+<h2><a name="actions">Actions</a></h2>
+<p>The class provides you different methods to manipulate images.</p>
+<p></p>
+<h3>actionBlur</h3>
+<p>Blur the image with a gaussian operator. Define the radius as first and the sigma as second parameter.</p>
+<pre>$l_oImageMagick->actionBlur(5, 2);</pre>
+
+<h3>actionBorder</h3>
+<p>Resize the image to given size. Make a transpanrent border around the image to fit the size. The direction parameter defines the position of the filling image.</p>
+<pre>$l_oImageMagick->actionBorder(400, 300, 'north');</pre>
+
+<h3>actionConvert</h3>
+<p>Converts the picture in a new format. Possible values are 'jpg', 'png', 'gif', 'bmp', ...</p>
+<pre>$l_oImageMagick->actionConvert("png");</pre>
+
+<h3>actionCrop</h3>
+<p>Crops the image to given size. The example crops the image at center 100x100 pixel.</p>
+<p>Third parameter:</p>
+<ul>
+	<li>"center" crops at center (default)</li>
+	<li>"left" crops only from the top left side</li>
+	<li>"right" crops only from the top right side</li>
+</ul>
+<pre>$l_oImageMagick->actionCrop(100, 100, 'center');</pre>
+
+<h3>actionFlip</h3>
+<p>Flips the image "horizontal" (default) or "vertical"</p>
+<pre>$l_oImageMagick->actionFlip('vertical');</pre>
+
+<h3>actionFrame</h3>
+<p>Draws a frame around the image with a width (default=5) and a color (default="666666")</p>
+<pre>$l_oImageMagick->actionFrame(6, "FF0000");</pre>
+
+<h3>actionFuzzyShadow</h3>
+<p>Create soft fuzzy shadows</p>
+<pre>$l_oImageMagick->actionFuzzyShadow();</pre>
+
+<h3>actionGrayscale</h3>
+<p>Converts the image to grayscale</p>
+<pre>$l_oImageMagick->actionGrayscale();</pre>
+
+<h3>actionLabel</h3>
+<p>Labels the image. Produce a alpha-transparent gray background with white text.</p>
+<ul>
+	<li>"south" draws text at the bottom of the image (default)</li>
+	<li>"north" draws text at the top of the image</li>
+	<li>"center" draws text in the middle of the image</li>
+</ul>
+<pre>$l_oImageMagick->actionLabel("Testlabel Test2 Test3 Test4", "south");</pre>
+
+<h3>actionManyPolaroids</h3>
+<p>Produce many polaroid images with random rotation.</p>
+<pre>$l_oImageMagick->actionManyPolaroids();</pre>
+
+<h3>actionMonochrome</h3>
+<p>Converts the image to monochrome (2 color black-white)</p>
+<pre>$l_oImageMagick->actionMonochrome();</pre>
+
+<h3>actionNegate</h3>
+<p>Converts the image to negative</p>
+<pre>$l_oImageMagick->actionNegate();</pre>
+
+<h3>actionPolaroid</h3>
+<p>Polaroid-like image with white border, a shadow, rotation. The parameter defines the rotation in degrees.</p>
+<pre>$l_oImageMagick->actionPolaroid(-6);</pre>
+
+<h3>actionResize</h3>
+<p>Resize the image to given size. Third parameter defines the method:</p>
+<ul>
+	<li>"keep_aspect" changes width and/or height of image proportional (default)</li>
+	<li>"fit" fit image to given size</li>
+</ul>
+<pre>$l_oImageMagick->actionResize(400, 300);</pre>
+
+<h3>actionRotate</h3>
+<p>Rotates the image by given degree. Second optional parameter defines the color in background (default is white). The third parameter:</p>
+<ul>
+	<li>"" empty is standard rotation (default)</li>
+	<li>"morewidth" rotates the image only if only if its width exceeds the height</li>
+	<li>"lesswidth" rotates the image only if its width is less than the height</li>
+</ul>
+<pre>$l_oImageMagick->actionRotate(30);</pre>
+
+<h3>actionSquare</h3>
+<p>Square the image by to different methods:</p>
+<ul>
+	<li>"crop" crop to largest square (default)</li>
+	<li>"border" add colored border (second parameter) to square the image. No cropping.</li>
+</ul>
+<pre>$l_oImageMagick->actionSquare('border', 'FFA200');</pre>
+
+
+<h2><a name="methods">Useful methods</a></h2>
+<h3>cleanUp</h3>
+<p>After all is done, you should perform the cleanUp-method to delete all temporary files.</p>
+<pre>$l_oImageMagick->cleanUp();</pre>
+
+<h3>goBackInAction</h3>
+<p>Go steps back and virtually delete actions. The parameter defines the amount of actions to revoke (default is 1). In this example we undo the crop-action.</p>
+<pre>
+include('class.imagickLib.php');
+$l_oImageMagick = new imagickLib();
+$l_oImageMagick->input("file", "./img/Bambus.jpg");
+$l_oImageMagick->actionGrayscale();
+$l_oImageMagick->actionCrop(100, 100, 'center');
+$l_oImageMagick->output("file", "testpic0");
+
+$l_oImageMagick->goBackInAction(1);
+
+$l_oImageMagick->actionFrame(1, "000000");
+$l_oImageMagick->actionFuzzyShadow();
+$l_oImageMagick->output("file", "testpic1");
+$l_oImageMagick->cleanUp();
+</pre>
+
+<h3>printError</h3>
+<p>For debug-purpose use the printError-method to print errors.</p>
+<pre>$l_oImageMagick->printError();</pre>
+
+
+<h2><a name="examples">Try examples</a></h2>
+<ul>
+	<li><a href="examples/example1.php">Example 1</a></li>
+	<li><a href="examples/example2.php">Example 2</a></li>
+	<li><a href="examples/example3.php">Example 3</a></li>
+	<li><a href="examples/example4.php">Example 4</a></li>
+	<li><a href="examples/example5.php">Example 5</a></li>
+</ul>
+
+</body>
+</html>
